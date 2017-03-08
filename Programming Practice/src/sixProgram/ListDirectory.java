@@ -21,11 +21,13 @@ public class ListDirectory extends BorderPane {
     public ListDirectory() {
         this.taList = new TextArea();
         this.btBrowser = new Button("Browser");
-        this.stringBuilder = new StringBuilder();
+        this.stringBuilder = new StringBuilder(); // store file and directory name
 
-//        taList.setPrefSize(400,400);
+        // bind the text area's height and width with the panel
         taList.prefWidthProperty().bind(this.widthProperty().subtract(15));
         taList.prefHeightProperty().bind(this.heightProperty().subtract(20));
+
+        // properties for the text area
         taList.setStyle("-fx-border-color: green");
         taList.setFont(new Font("Serif", 14));
         taList.setWrapText(true);
@@ -34,15 +36,17 @@ public class ListDirectory extends BorderPane {
         ScrollPane scroll = new ScrollPane(taList);
         setCenter(scroll);
         setBottom(btBrowser);
+        //set Alignment
         BorderPane.setAlignment(btBrowser, Pos.BOTTOM_RIGHT);
         BorderPane.setAlignment(taList, Pos.CENTER);
 
+        // register the event handler
         btBrowser.setOnAction(event -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File file = directoryChooser.showDialog(null);
             if (file != null) {
-                getList(file.getAbsolutePath(), 0);
-                setListInfo();
+                getList(file.getAbsolutePath(), 0); // retrieve all by recursion
+                setListInfo(); // show the result
             }
         });
     }
@@ -57,6 +61,7 @@ public class ListDirectory extends BorderPane {
         if (currentLevelFiles != null && currentLevelFiles.length > 0) {
             for (File file : currentLevelFiles) {
                 for (int i = 0; i < level; i++) {
+                    // the indentation is for sub folders
                     stringBuilder.append("\t");
                 }
                 if (file.isDirectory()) {

@@ -10,10 +10,10 @@ public class Program2 extends Application{
     public void start(Stage primaryStage) {
         ListDirectory app = new ListDirectory();
 
-        Scene scene = new Scene(app,300,250);
+        Scene scene = new Scene(app,300,250); //create scene to hold the app
         primaryStage.setTitle("FileList");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        primaryStage.setScene(scene); // put the scene in the stage
+        primaryStage.show(); // display
     }
 
     public static void main(String[] args) {

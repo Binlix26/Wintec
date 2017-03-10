@@ -37,9 +37,10 @@ public class Program5 {
         while (scanner.hasNext()) {
             // eliminate the punctuations and make it lowercase
             key = clean(scanner.next());
+            // use equals instead of '=='
+            if(key.equals("")) continue;
 
-
-            if (key != "" && map.containsKey(key)) {
+            if ( map.containsKey(key)) {
                 int value = map.get(key);
                 value++;
                 map.put(key, value);
@@ -60,8 +61,10 @@ public class Program5 {
         int maxValueInMap = Collections.max(hashMap.values());
         for (Map.Entry<String, Integer> entry : hashMap.entrySet()
                 ) {
-            if (entry.getValue() == maxValueInMap)
+            if (entry.getValue() == maxValueInMap) {
+                System.out.println("The most frequent word: ");
                 System.out.println(entry.getKey() + " = " + maxValueInMap);
+            }
         }
     }
 }

@@ -41,15 +41,16 @@ public class InvertedIndex {
     }
 
     public void display() {
-        for (Map.Entry<String, Frequency> entry: index.entrySet()
-             ) {
+        for (Map.Entry<String, Frequency> entry : index.entrySet()
+                ) {
             Frequency fre = entry.getValue();
             List<FileInfo> posting = fre.getPosting();
 
-            System.out.print(entry.getKey()+"\t"+fre.getFrequency()+" -> ");
-            for (FileInfo node: posting
-                 ) {
-                System.out.print("[ "+node.getFileID()+", "+node.getPositions().toString()+"], ");
+            System.out.print(entry.getKey() + "\t" + fre.getFrequency() + " -> ");
+            for (FileInfo node : posting
+                    ) {
+                System.out.print("[ " + node.getFileID() +
+                        ", " + node.getOccurrence() + ":" + node.getPositions().toString() + "], ");
             }
             System.out.println();
         }

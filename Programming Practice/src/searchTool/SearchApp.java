@@ -1,6 +1,7 @@
 package searchTool;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -12,7 +13,11 @@ import java.io.IOException;
 public class SearchApp extends Application {
     @Override
     public void start(Stage primaryStage) {
-
+        AppGUI app = new AppGUI();
+        Scene scene = new Scene(app,450,250);
+        primaryStage.setTitle("Search Tool");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
@@ -34,5 +39,7 @@ public class SearchApp extends Application {
         }
 
         app.display();
+
+        Application.launch(args);
     }
 }

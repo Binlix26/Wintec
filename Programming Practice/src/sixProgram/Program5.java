@@ -7,10 +7,6 @@ import java.util.*;
 /**
  * Created by binlix26 on 9/03/17.
  *
- * remaining problems:
- * 1. find out how to eliminate "" in the map;
- * 2. Analysis
- *
  */
 public class Program5 {
     public static void main(String[] args) {

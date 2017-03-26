@@ -12,7 +12,7 @@ public class Frequency {
 
     private int frequency;
     private Set<Integer> files = new HashSet<>();
-    List<FileInfo> posting = new ArrayList<FileInfo>();
+    private List<FileInfo> posting = new ArrayList<>();
 
     public Frequency() {
         this.frequency = 0;

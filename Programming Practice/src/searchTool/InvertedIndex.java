@@ -9,8 +9,8 @@ import java.util.*;
 public class InvertedIndex {
 
     private int numForFileID = 1;
-    TreeMap<Integer, File> indexToFiles = new TreeMap<>();
-    Map<String, Frequency> invertedMap = new HashMap<>();
+    private TreeMap<Integer, File> indexToFiles = new TreeMap<>();
+    private Map<String, Frequency> invertedMap = new HashMap<>();
 
     // make inverted index
     private void indexFile(File file) throws IOException {

@@ -25,6 +25,7 @@ public class AppGUI extends Pane {
     public AppGUI() {
         stringBuilder = new StringBuilder();
 
+        // assembling each part of the UI
         HBox topArea = getTopArea();
         ScrollPane forTextArea = getCenterArea();
         HBox bottomArea = getBottomArea();
@@ -50,6 +51,15 @@ public class AppGUI extends Pane {
         File file = dirChooser.showDialog(null);
 
         if (file != null) {
+            String status = file.getAbsolutePath();
+            lblStatus.setText(status);
+
+            // get inverted index for the files under the chosen directory
+            InvertedIndex invertedIndex = new InvertedIndex();
+            invertedIndex.getFilesForInvertedIndex(file);
+
+            invertedIndex.displayInvertedIndex();
+            invertedIndex.displayFileMap();
 
         }
     }

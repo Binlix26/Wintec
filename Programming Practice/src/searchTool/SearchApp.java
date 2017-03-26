@@ -20,7 +20,10 @@ public class SearchApp extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
+
+
+    // for test the inverted index at the beginning
+    /*public static void main(String[] args) {
         String root = "/Users/binlix26/Documents/test search/doc";
         File[] files = new File[4];
         for (int i = 0; i < files.length; i++) {
@@ -41,5 +44,5 @@ public class SearchApp extends Application {
         app.display();
 
         Application.launch(args);
-    }
+    }*/
 }

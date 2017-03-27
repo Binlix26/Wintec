@@ -12,6 +12,31 @@ public class InvertedIndex {
     private TreeMap<Integer, File> indexToFiles = new TreeMap<>();
     private Map<String, Frequency> invertedMap = new HashMap<>();
 
+    public String getFilePathById(int fileID) {
+        File file = indexToFiles.get(fileID);
+        String path = null;
+
+        if (file == null)
+            path = "Invalid file ID";
+        path = file.getAbsolutePath();
+
+        return path;
+    }
+
+    // get value by keys
+    public int[] getArrayOfFileIDs(String key) {
+        // get an array of id
+        Frequency frequency = invertedMap.get(key);
+
+        if (frequency != null) {
+            int[] fileIDs = frequency.getFileIDs();
+            return fileIDs;
+        }
+
+        // not found this term occurs in all the files under the chosen directory
+        return null;
+    }
+
     // make inverted index
     private void indexFile(File file) throws IOException {
 

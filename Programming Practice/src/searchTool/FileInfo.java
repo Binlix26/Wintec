@@ -7,9 +7,8 @@ import java.util.ArrayList;
  */
 public class FileInfo {
     private int fileID;
-    private int occurrence;
+    private int occurrence; // frequency in a file
     private ArrayList<Integer> positions = new ArrayList<>();
-
 
     public FileInfo(int fileID) {
         this.fileID = fileID;

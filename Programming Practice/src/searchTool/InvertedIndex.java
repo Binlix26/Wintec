@@ -14,7 +14,7 @@ public class InvertedIndex {
 
     public String getFilePathById(int fileID) {
         File file = indexToFiles.get(fileID);
-        String path = null;
+        String path;
 
         if (file == null)
             path = "Invalid file ID";
@@ -48,7 +48,8 @@ public class InvertedIndex {
 
             for (String word : line.split("\\W+") // split line into words array
                     ) {
-                String term = word.toLowerCase();
+                // normalize the term
+                String term = WordNormalization.normalize(word.toLowerCase());
                 pos++; // move position by one
 
                 Frequency fre = invertedMap.get(term);
@@ -66,6 +67,21 @@ public class InvertedIndex {
 
         numForFileID++;
     }
+
+    // use the Porter stemmer Class to process the term
+   /* private String stemming(String term) {
+        Stemmer stemmer = new Stemmer();
+
+        char[] chs = term.toCharArray();
+        stemmer.add(chs, chs.length);
+        stemmer.stem();
+
+        String termRoot;
+        termRoot = new String(
+                stemmer.getResultBuffer(), 0, stemmer.getResultLength());
+
+        return termRoot;
+    }*/
 
     // receive the chosen directory
     public void getFilesForInvertedIndex(File directory) {
@@ -125,5 +141,9 @@ public class InvertedIndex {
             Map.Entry<Integer, File> entry = iterator.next();
             System.out.println(entry.getKey() + " -> " + entry.getValue().getAbsolutePath());
         }
+    }
+
+    public boolean isEmpty() {
+        return this.invertedMap.isEmpty();
     }
 }

@@ -20,7 +20,7 @@ public class AppGUI extends Pane {
     private Button btBrowser;
     private Button btSearch;
     private Label lblStatus;
-    private InvertedIndex invertedIndex;
+    private InvertedIndex invertedIndex = new InvertedIndex();
 
     public AppGUI() {
 
@@ -54,7 +54,6 @@ public class AppGUI extends Pane {
             lblStatus.setText(status);
 
             // get inverted index for the files under the chosen directory
-            this.invertedIndex = new InvertedIndex();
             invertedIndex.getFilesForInvertedIndex(file);
 
             invertedIndex.displayInvertedIndex();
@@ -64,6 +63,12 @@ public class AppGUI extends Pane {
     }
 
     private void handleSearch() {
+        // NullPointerException will be thrown without this check
+        if (invertedIndex.isEmpty()) {
+            taResult.setText("Please choose a directory before you search!");
+            return;
+        }
+
         // get text from user
         String queryList = queryInput.getText();
 
@@ -71,8 +76,12 @@ public class AppGUI extends Pane {
         ArrayList<int[]> idList = new ArrayList<>();
 
         // deal with the term list
-        for (String term :
+        for (String word :
                 queryList.split("\\W+")) {
+
+            // stemming the word before it is searched as a key in the map
+            String term = WordNormalization.normalize(word.toLowerCase());
+
             // put each array of fileIDs for each term in the ArrayList
             if (invertedIndex.getArrayOfFileIDs(term) != null) {
                 idList.add(invertedIndex.getArrayOfFileIDs(term));

@@ -25,6 +25,8 @@ public class AppGUI extends Pane {
     private Label lblStatus;
     private InvertedIndex invertedIndex;
     private PreparedStatement pstmt;
+    // TODO: 30/03/17 set checkbox to determine this value
+    private boolean isSynonymEnable = true;
 
     public AppGUI() {
 
@@ -107,23 +109,36 @@ public class AppGUI extends Pane {
             // stemming the word before it is searched as a key in the map
             String term = WordNormalization.normalize(word.toLowerCase());
 
+            int[] arrOfIDs = null;
+
             // TODO: 30/03/17 search synonym database
-            pstmt.setString(1, term);
-            ResultSet resultSet = pstmt.executeQuery();
-            // block the thread and wait for result
-            if (resultSet.next()) {
-                String key = resultSet.getString(1);
-                String value = resultSet.getString(2);
-                System.out.println(key+","+value);
+            if (isSynonymEnable) {
+
+                pstmt.setString(1, term);
+                ResultSet resultSet = pstmt.executeQuery();
+                // block the thread and wait for result
+                if (resultSet.next()) {
+                    String key = resultSet.getString(1);
+                    String value = resultSet.getString(2);
+                    String sysnonyms = key+","+value;
+
+                    arrOfIDs = invertedIndex.getSynonymFilesID(sysnonyms);
+
+                }
+            } else {
+                // don't need the database
+                // put each array of fileIDs for each term in the ArrayList
+                arrOfIDs = invertedIndex.getArrayOfFileIDs(term);
             }
 
-            // put each array of fileIDs for each term in the ArrayList
-            if (invertedIndex.getArrayOfFileIDs(term) != null) {
-                idList.add(invertedIndex.getArrayOfFileIDs(term));
+            // check if there is any word not in the files
+            if ( arrOfIDs != null) {
+                idList.add(arrOfIDs);
             } else {
                 taResult.setText("No match has been found!");
                 return;
             }
+
         }
 
         if (idList.size() == 1) {

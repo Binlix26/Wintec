@@ -23,6 +23,34 @@ public class InvertedIndex {
         return path;
     }
 
+    //get values by synonym keys
+    public int[] getSynonymFilesID(String sysnonyms) {
+        String[] terms = sysnonyms.split(",");
+
+        Set<Integer> set = new HashSet<>();
+
+        for (int i = 0; i < terms.length; i++) {
+            int[] fielIDs = getArrayOfFileIDs(terms[i]);
+
+            // not all the words are supposed be in the files
+            if (fielIDs == null) continue;
+
+            for (int id :
+                    fielIDs) {
+                set.add(id);
+            }
+        }
+
+        int[] result = new int[set.size()];
+        int index = 0;
+        for (int id :
+                set) {
+            result[index++] = id;
+        }
+
+        return result;
+    }
+
     // get value by keys
     public int[] getArrayOfFileIDs(String key) {
         // get an array of id

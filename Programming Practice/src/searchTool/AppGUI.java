@@ -8,6 +8,9 @@ import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -20,7 +23,8 @@ public class AppGUI extends Pane {
     private Button btBrowser;
     private Button btSearch;
     private Label lblStatus;
-    private InvertedIndex invertedIndex = new InvertedIndex();
+    private InvertedIndex invertedIndex;
+    private PreparedStatement pstmt;
 
     public AppGUI() {
 
@@ -34,7 +38,7 @@ public class AppGUI extends Pane {
         // set the center area
         taResult = new TextArea();
         taResult.setEditable(false);
-        taResult.prefWidthProperty().bind(mainPane.widthProperty().subtract(25));
+        taResult.prefWidthProperty().bind(mainPane.widthProperty().subtract(50));
         taResult.prefHeightProperty().bind(mainPane.heightProperty().subtract(25));
 
         mainPane.setCenter(taResult);
@@ -47,18 +51,30 @@ public class AppGUI extends Pane {
 
         this.getChildren().add(mainPane);
 
+        try {
+            pstmt = new DatabaseConnector().initDB();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void handleBrowse() {
         DirectoryChooser dirChooser = new DirectoryChooser();
 
-        File file = dirChooser.showDialog(null);
+        File dir = dirChooser.showDialog(null);
 
-        if (file != null) {
-            String status = file.getAbsolutePath();
+        if (dir != null) {
+            String status = dir.getAbsolutePath();
+
+            // make sure the inverted index only contains the file under the current directory
+            // clear the records for previously chosen directory
+            invertedIndex = new InvertedIndex();
 
             // get inverted index for the files under the chosen directory
-            invertedIndex.getFilesForInvertedIndex(file);
+            invertedIndex.getFilesForInvertedIndex(dir);
 
             lblStatus.setText(status);
             invertedIndex.displayInvertedIndex();
@@ -67,9 +83,9 @@ public class AppGUI extends Pane {
         }
     }
 
-    private void handleSearch() {
+    private void handleSearch() throws SQLException {
         // NullPointerException will be thrown without this check
-        if (invertedIndex.isEmpty()) {
+        if (invertedIndex == null) {
             taResult.setText("Please choose a directory before you search!");
             return;
         }
@@ -81,7 +97,6 @@ public class AppGUI extends Pane {
             taResult.setText("Please enter your query before searching.");
             return;
         }
-
         // to hold the fileIDs that contain all the terms in the query
         ArrayList<int[]> idList = new ArrayList<>();
 
@@ -91,6 +106,16 @@ public class AppGUI extends Pane {
 
             // stemming the word before it is searched as a key in the map
             String term = WordNormalization.normalize(word.toLowerCase());
+
+            // TODO: 30/03/17 search synonym database
+            pstmt.setString(1, term);
+            ResultSet resultSet = pstmt.executeQuery();
+            // block the thread and wait for result
+            if (resultSet.next()) {
+                String key = resultSet.getString(1);
+                String value = resultSet.getString(2);
+                System.out.println(key+","+value);
+            }
 
             // put each array of fileIDs for each term in the ArrayList
             if (invertedIndex.getArrayOfFileIDs(term) != null) {
@@ -173,7 +198,13 @@ public class AppGUI extends Pane {
         HBox.setMargin(btSearch, new Insets(0, 0, 0, 20));
 
         queryInput.prefWidthProperty().bind(this.widthProperty().divide(1.5));
-        btSearch.setOnAction(event -> handleSearch());
+        btSearch.setOnAction(event -> {
+            try {
+                handleSearch();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
 
         return pane;
     }
@@ -195,5 +226,4 @@ public class AppGUI extends Pane {
 
         return pane;
     }
-
 }

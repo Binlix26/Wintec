@@ -12,7 +12,6 @@ public class WordNormalization {
 
     // use the Porter stemmer Class to process the term
     public static String normalize(String term) {
-        Stemmer stemmer = new Stemmer();
 
         char[] chs = term.toCharArray();
         stemmer.add(chs, chs.length);

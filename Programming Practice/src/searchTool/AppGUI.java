@@ -26,13 +26,18 @@ public class AppGUI extends Pane {
 
         // assembling each part of the UI
         HBox topArea = getTopArea();
-        ScrollPane forTextArea = getCenterArea();
         HBox bottomArea = getBottomArea();
 
         //pane to hold everything
         BorderPane mainPane = new BorderPane();
 
-        mainPane.setCenter(forTextArea);
+        // set the center area
+        taResult = new TextArea();
+        taResult.setEditable(false);
+        taResult.prefWidthProperty().bind(mainPane.widthProperty().subtract(25));
+        taResult.prefHeightProperty().bind(mainPane.heightProperty().subtract(25));
+
+        mainPane.setCenter(taResult);
         mainPane.setTop(topArea);
         mainPane.setBottom(bottomArea);
 
@@ -51,11 +56,11 @@ public class AppGUI extends Pane {
 
         if (file != null) {
             String status = file.getAbsolutePath();
-            lblStatus.setText(status);
 
             // get inverted index for the files under the chosen directory
             invertedIndex.getFilesForInvertedIndex(file);
 
+            lblStatus.setText(status);
             invertedIndex.displayInvertedIndex();
             invertedIndex.displayFileMap();
 
@@ -71,6 +76,11 @@ public class AppGUI extends Pane {
 
         // get text from user
         String queryList = queryInput.getText();
+
+        if (queryList.equals("")) {
+            taResult.setText("Please enter your query before searching.");
+            return;
+        }
 
         // to hold the fileIDs that contain all the terms in the query
         ArrayList<int[]> idList = new ArrayList<>();
@@ -182,20 +192,6 @@ public class AppGUI extends Pane {
 
         lblStatus.prefWidthProperty().bind(this.widthProperty().divide(1.5));
         btBrowser.setOnAction(event -> handleBrowse());
-
-        return pane;
-    }
-
-    private ScrollPane getCenterArea() {
-
-        taResult = new TextArea();
-        taResult.setEditable(false);
-
-        ScrollPane pane = new ScrollPane(taResult);
-
-        pane.setPadding(new Insets(5));
-        taResult.prefWidthProperty().bind(pane.widthProperty().subtract(25));
-        taResult.prefHeightProperty().bind(pane.heightProperty());
 
         return pane;
     }

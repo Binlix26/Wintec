@@ -5,7 +5,7 @@ import java.util.*;
 
 /**
  * Created by binlix26 on 25/03/17.
- *
+ * <p>
  * This class contains every information about how the
  * inverted index is defined for this search tool.
  */
@@ -14,6 +14,7 @@ public class InvertedIndex {
     private int numForFileID = 1;
     private TreeMap<Integer, File> indexToFiles = new TreeMap<>();
     private Map<String, Frequency> invertedMap = new HashMap<>();
+    private HashMap<Integer, String> indexToWantedWords;
 
     public String getFilePathById(int fileID) {
         File file = indexToFiles.get(fileID);
@@ -24,6 +25,12 @@ public class InvertedIndex {
         path = file.getAbsolutePath();
 
         return path;
+    }
+
+    // empty the indexToWantedWords map each time user click search button
+    // in order to accurately referring words with file ID
+    public void refreshIndexToWords() {
+        this.indexToWantedWords = new HashMap<>();
     }
 
     //get values by synonym keys
@@ -61,11 +68,36 @@ public class InvertedIndex {
 
         if (frequency != null) {
             int[] fileIDs = frequency.getFileIDs();
+            // populate the map
+            storeWordByFileID(fileIDs, key);
             return fileIDs;
         }
 
         // not found this term occurs in all the files under the chosen directory
         return null;
+    }
+
+    private void storeWordByFileID(int[] fileIDs, String term) {
+
+        for (int id :
+                fileIDs) {
+            String value = indexToWantedWords.get(id);
+
+            // get method will return null if there is no such an id
+            if (value != null) {
+                // split the string and put it into a set
+                Set<String> mySet = new HashSet<>(Arrays.asList(value.split("\\W+")));
+
+                if (!mySet.contains(term)) {
+                    value = value + ":" + term;
+                    indexToWantedWords.put(id, value);
+                }
+            } else {
+                // id, first time
+                indexToWantedWords.put(id, term);
+            }
+        }
+
     }
 
     // make inverted index
@@ -161,5 +193,10 @@ public class InvertedIndex {
 
     public boolean isEmpty() {
         return this.invertedMap.isEmpty();
+    }
+
+    public String getDetailedResult(Integer fileID) {
+        String words = indexToWantedWords.get(fileID);
+        return words;
     }
 }

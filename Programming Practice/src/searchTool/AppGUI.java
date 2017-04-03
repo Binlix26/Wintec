@@ -118,6 +118,9 @@ public class AppGUI extends Pane {
         // to hold the fileIDs that contain all the terms in the query
         ArrayList<int[]> idList = new ArrayList<>();
 
+        //refresh the map: fileId = words ( the map is for better displaying results )
+        invertedIndex.refreshIndexToWords();
+
         // deal with the term list
         for (String word :
                 queryList.split("\\W+")) {
@@ -213,6 +216,9 @@ public class AppGUI extends Pane {
         for (Integer fileID :
                 list) {
             stringBuilder.append(invertedIndex.getFilePathById(fileID))
+                    .append("\n")
+                    .append("Contains -> ")
+                    .append(invertedIndex.getDetailedResult(fileID))
                     .append("\n");
         }
 

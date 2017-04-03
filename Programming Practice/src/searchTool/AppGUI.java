@@ -127,7 +127,7 @@ public class AppGUI extends Pane {
 
             int[] arrOfIDs = null;
 
-            // TODO: 30/03/17 search synonym database
+            // search synonym database if necessary
             if (isSynonymEnable) {
 
                 pstmt.setString(1, term);

@@ -99,21 +99,6 @@ public class InvertedIndex {
         numForFileID++;
     }
 
-    // use the Porter stemmer Class to process the term
-   /* private String stemming(String term) {
-        Stemmer stemmer = new Stemmer();
-
-        char[] chs = term.toCharArray();
-        stemmer.add(chs, chs.length);
-        stemmer.stem();
-
-        String termRoot;
-        termRoot = new String(
-                stemmer.getResultBuffer(), 0, stemmer.getResultLength());
-
-        return termRoot;
-    }*/
-
     // receive the chosen directory
     public void getFilesForInvertedIndex(File directory) {
         String dirPath = directory.getAbsolutePath();

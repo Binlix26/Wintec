@@ -1,10 +1,12 @@
 package searchTool;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
@@ -15,6 +17,10 @@ import java.util.*;
 
 /**
  * Created by binlix26 on 26/03/17.
+ *
+ * This code snippet is responsible for assembling all the
+ * components for the UI, defining the event handler as well as
+ * searching the database if needed.
  */
 public class AppGUI extends Pane {
 
@@ -25,14 +31,14 @@ public class AppGUI extends Pane {
     private Label lblStatus;
     private InvertedIndex invertedIndex;
     private PreparedStatement pstmt;
-    // TODO: 30/03/17 set checkbox to determine this value
-    private boolean isSynonymEnable = true;
+    private boolean isSynonymEnable = false;
 
     public AppGUI() {
 
         // assembling each part of the UI
         HBox topArea = getTopArea();
         HBox bottomArea = getBottomArea();
+        VBox rightArea = getRightArea();
 
         //pane to hold everything
         BorderPane mainPane = new BorderPane();
@@ -46,6 +52,7 @@ public class AppGUI extends Pane {
         mainPane.setCenter(taResult);
         mainPane.setTop(topArea);
         mainPane.setBottom(bottomArea);
+        mainPane.setRight(rightArea);
 
         // bind width and height
         mainPane.prefWidthProperty().bind(this.widthProperty());
@@ -53,14 +60,16 @@ public class AppGUI extends Pane {
 
         this.getChildren().add(mainPane);
 
-        try {
-            pstmt = new DatabaseConnector().initDB();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        // never block the main thread from listening the event from users
+        new Thread(() -> {
+            try {
+                pstmt = new DatabaseConnector().initDB();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void handleBrowse() {
@@ -73,14 +82,21 @@ public class AppGUI extends Pane {
 
             // make sure the inverted index only contains the file under the current directory
             // clear the records for previously chosen directory
-            invertedIndex = new InvertedIndex();
+            // never affects the main Thread responding the UI event
+            new Thread(() -> {
 
-            // get inverted index for the files under the chosen directory
-            invertedIndex.getFilesForInvertedIndex(dir);
+                invertedIndex = new InvertedIndex();
 
-            lblStatus.setText(status);
-            invertedIndex.displayInvertedIndex();
-            invertedIndex.displayFileMap();
+                // get inverted index for the files under the chosen directory
+                invertedIndex.getFilesForInvertedIndex(dir);
+
+                Platform.runLater(() -> {
+                    lblStatus.setText(status);
+                });
+
+                invertedIndex.displayInvertedIndex();
+                invertedIndex.displayFileMap();
+            }).start();
 
         }
     }
@@ -238,6 +254,36 @@ public class AppGUI extends Pane {
 
         lblStatus.prefWidthProperty().bind(this.widthProperty().divide(1.5));
         btBrowser.setOnAction(event -> handleBrowse());
+
+        return pane;
+    }
+
+    private VBox getRightArea() {
+        VBox pane = new VBox(15);
+
+        pane.setPadding(new Insets(5));
+        pane.setStyle("-fx-border-color: green");
+
+        RadioButton enableDB = new RadioButton("Enable");
+        RadioButton disableDB = new RadioButton("Disable");
+        pane.getChildren().addAll(new Label("Database: "), enableDB, disableDB);
+
+        disableDB.setSelected(true);
+
+        ToggleGroup group = new ToggleGroup();
+        enableDB.setToggleGroup(group);
+        disableDB.setToggleGroup(group);
+
+        // event handle
+        enableDB.setOnAction(event ->  {
+            if (enableDB.isSelected())
+                this.isSynonymEnable = true;
+        });
+
+        disableDB.setOnAction(event -> {
+            if (disableDB.isSelected())
+                this.isSynonymEnable = false;
+        });
 
         return pane;
     }

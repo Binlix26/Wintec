@@ -5,6 +5,9 @@ import java.util.*;
 
 /**
  * Created by binlix26 on 25/03/17.
+ *
+ * This class contains every information about how the
+ * inverted index is defined for this search tool.
  */
 public class InvertedIndex {
 

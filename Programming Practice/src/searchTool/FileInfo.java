@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 /**
  * Created by binlix26 on 25/03/17.
+ *
+ * The exact node on the posting list held by the Frequency Object.
  */
 public class FileInfo {
     private int fileID;

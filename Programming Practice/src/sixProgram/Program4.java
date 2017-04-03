@@ -9,15 +9,15 @@ public class Program4 {
     public static void main(String[] args) {
         int[] arr = getArray(1000000);
 
-        /*QuickSort quick = new QuickSort();
-        quick.run(arr);*/
+        QuickSort quick = new QuickSort();
+        quick.run(arr);
 //        print(arr);
 
 //        print(arr);
 
-        BubbleSort bubble = new BubbleSort();
+        /*BubbleSort bubble = new BubbleSort();
         arr = bubble.run(arr);
-        print(arr);
+        print(arr);*/
 
 
     }

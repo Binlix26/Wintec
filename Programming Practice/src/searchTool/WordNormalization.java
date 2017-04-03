@@ -2,6 +2,9 @@ package searchTool;
 
 /**
  * Created by binlix26 on 28/03/17.
+ *
+ * This code snippet uses singleton design pattern to provide the normalize()
+ * function for everyone who will be invoking it to conduct a word normalization.
  */
 public class WordNormalization {
     private static Stemmer stemmer = new Stemmer();

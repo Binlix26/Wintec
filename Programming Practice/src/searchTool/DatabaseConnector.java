@@ -4,6 +4,8 @@ import java.sql.*;
 
 /**
  * Created by binlix26 on 30/03/17.
+ *
+ * The purpose of this code snippet is to connect to my local MySQL database.
  */
 public class DatabaseConnector {
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";

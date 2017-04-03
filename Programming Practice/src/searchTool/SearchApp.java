@@ -9,6 +9,8 @@ import java.io.IOException;
 
 /**
  * Created by binlix26 on 25/03/17.
+ *
+ * The entry of this search tool software.
  */
 public class SearchApp extends Application {
     @Override

@@ -11,7 +11,7 @@ public class DatabaseConnector {
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     static final String USERNAME = "synonym";
     static final String DB_URL = "jdbc:mysql://localhost/synonym?useSSL=false";
-    static final String PASSWORD = "ilbfly1990";
+    static final String PASSWORD = "synonym";
 
     public PreparedStatement initDB() throws ClassNotFoundException, SQLException {
         Class.forName(JDBC_DRIVER);

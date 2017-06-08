@@ -286,11 +286,15 @@ public class AppGUI extends Pane {
         enableDB.setOnAction(event -> {
             if (enableDB.isSelected())
                 this.isSynonymEnable = true;
+            // debug purpose
+            System.out.println("Synonym Database Enable is:" + isSynonymEnable);
         });
 
         disableDB.setOnAction(event -> {
             if (disableDB.isSelected())
                 this.isSynonymEnable = false;
+            // debug purpose
+            System.out.println("Synonym Database Enable is:" + isSynonymEnable);
         });
 
         return pane;

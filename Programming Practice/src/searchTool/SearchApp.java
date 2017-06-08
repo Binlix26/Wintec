@@ -4,9 +4,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-
 /**
  * Created by binlix26 on 25/03/17.
  *

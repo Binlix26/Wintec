@@ -13,11 +13,12 @@ import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by binlix26 on 26/03/17.
- *
+ * <p>
  * This code snippet is responsible for assembling all the
  * components for the UI, defining the event handler as well as
  * searching the database if needed.
@@ -128,7 +129,7 @@ public class AppGUI extends Pane {
             // stemming the word before it is searched as a key in the map
             String term = WordNormalization.normalize(word.toLowerCase());
 
-            int[] arrOfIDs = null;
+            int[] arrOfIDs = null; // file IDs contain this term
 
             // search synonym database if necessary
             if (isSynonymEnable) {
@@ -139,7 +140,7 @@ public class AppGUI extends Pane {
                 if (resultSet.next()) {
                     String key = resultSet.getString(1);
                     String value = resultSet.getString(2);
-                    String sysnonyms = key+","+value;
+                    String sysnonyms = key + "," + value;
 
                     arrOfIDs = invertedIndex.getSynonymFilesID(sysnonyms);
 
@@ -151,7 +152,7 @@ public class AppGUI extends Pane {
             }
 
             // check if there is any word not in the files
-            if ( arrOfIDs != null) {
+            if (arrOfIDs != null) {
                 idList.add(arrOfIDs);
             } else {
                 taResult.setText("No match has been found!");
@@ -160,6 +161,7 @@ public class AppGUI extends Pane {
 
         }
 
+        // when user is only entering one word
         if (idList.size() == 1) {
             // pass the list and show the result
             ArrayList<Integer> listIntersection = new ArrayList<>();
@@ -227,7 +229,7 @@ public class AppGUI extends Pane {
 
     private HBox getTopArea() {
         queryInput = new TextField();
-        btSearch = new Button("search");
+        btSearch = new Button("Search");
 
         HBox pane = new HBox(20);
         pane.getChildren().addAll(queryInput, btSearch);
@@ -247,7 +249,7 @@ public class AppGUI extends Pane {
     }
 
     private HBox getBottomArea() {
-        btBrowser = new Button("browser");
+        btBrowser = new Button("Browser");
         lblStatus = new Label();
 
         // default information
@@ -281,7 +283,7 @@ public class AppGUI extends Pane {
         disableDB.setToggleGroup(group);
 
         // event handle
-        enableDB.setOnAction(event ->  {
+        enableDB.setOnAction(event -> {
             if (enableDB.isSelected())
                 this.isSynonymEnable = true;
         });

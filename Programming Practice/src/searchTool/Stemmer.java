@@ -1,7 +1,5 @@
 package searchTool;
 
-import java.io.*;
-
 /**
  * Stemmer, implementing the Porter Stemming Algorithm
  * <p>
@@ -11,7 +9,7 @@ import java.io.*;
  */
 
 
-public class Stemmer {
+class Stemmer {
 
     private char[] b;
     private int i,     /* offset into b */

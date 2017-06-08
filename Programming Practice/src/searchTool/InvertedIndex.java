@@ -1,6 +1,9 @@
 package searchTool;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -22,7 +25,8 @@ public class InvertedIndex {
 
         if (file == null)
             path = "Invalid file ID";
-        path = file.getAbsolutePath();
+        else
+            path = file.getAbsolutePath();
 
         return path;
     }
@@ -88,8 +92,9 @@ public class InvertedIndex {
                 // split the string and put it into a set
                 Set<String> mySet = new HashSet<>(Arrays.asList(value.split("\\W+")));
 
+                // simplest way to check if value has already included the term
                 if (!mySet.contains(term)) {
-                    value = value + ":" + term;
+                    value = value + "," + term;
                     indexToWantedWords.put(id, value);
                 }
             } else {
@@ -127,8 +132,6 @@ public class InvertedIndex {
                 fre.addPosition(numForFileID, pos);
             }
         }
-
-        numForFileID++;
     }
 
     // receive the chosen directory
@@ -155,6 +158,8 @@ public class InvertedIndex {
 
                         // make inverted index for the files
                         indexFile(file);
+
+                        numForFileID++;
                     }
                 }
             } catch (IOException e) {

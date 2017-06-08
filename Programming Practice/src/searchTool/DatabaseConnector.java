@@ -16,15 +16,13 @@ public class DatabaseConnector {
     static final String DB_URL = "jdbc:mysql://localhost/synonym?useSSL=false";
     static final String PASSWORD = "synonym";
 
-    public PreparedStatement initDB() throws ClassNotFoundException, SQLException {
+    public Connection initDB() throws ClassNotFoundException, SQLException {
         Class.forName(JDBC_DRIVER);
         System.out.println("Driver loaded.");
 
         Connection conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
         System.out.println("Database connected.");
 
-        String sql = "SELECT * FROM Words WHERE word = ?";
-        PreparedStatement statement = conn.prepareStatement(sql);
-        return statement;
+        return conn;
     }
 }

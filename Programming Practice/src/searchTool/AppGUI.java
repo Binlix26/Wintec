@@ -1,20 +1,22 @@
 package searchTool;
 
 import javafx.application.Platform;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by binlix26 on 26/03/17.
@@ -27,11 +29,9 @@ public class AppGUI extends Pane {
 
     private TextField queryInput;
     private TextArea taResult;
-    private Button btBrowser;
-    private Button btSearch;
     private Label lblStatus;
     private InvertedIndex invertedIndex;
-    private PreparedStatement pstmt;
+    private Connection conn;
     private boolean isSynonymEnable = false;
 
     public AppGUI() {
@@ -64,7 +64,8 @@ public class AppGUI extends Pane {
         // never block the main thread from listening the event from users
         new Thread(() -> {
             try {
-                pstmt = new DatabaseConnector().initDB();
+                conn = new DatabaseConnector().initDB();
+
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (SQLException e) {
@@ -122,6 +123,14 @@ public class AppGUI extends Pane {
         //refresh the map: fileId = words ( the map is for better displaying results )
         invertedIndex.refreshIndexToWords();
 
+        // prepare for searching the database
+        PreparedStatement statement = null;
+        if (isSynonymEnable) {
+            String sql = "SELECT * FROM Words WHERE word = ?";
+            statement = conn.prepareStatement(sql);
+            System.out.println("isSynonymEnable is: " + isSynonymEnable);
+        }
+
         // deal with the term list
         for (String word :
                 queryList.split("\\W+")) {
@@ -134,19 +143,26 @@ public class AppGUI extends Pane {
             // search synonym database if necessary
             if (isSynonymEnable) {
 
-                pstmt.setString(1, term);
-                ResultSet resultSet = pstmt.executeQuery();
+                statement.setString(1, term);
+                ResultSet resultSet = statement.executeQuery();
+                System.out.println("<----- Querying ----->");
 
                 if (resultSet.next()) {
                     String key = resultSet.getString(1);
                     String value = resultSet.getString(2);
-                    String sysnonyms = key + "," + value;
+                    String synonyms = key + "," + value;
 
-                    arrOfIDs = invertedIndex.getSynonymFilesID(sysnonyms);
+                    System.out.println("Data from the database: ");
+                    System.out.println(key + " -> " + value + "\n");
+
+                    arrOfIDs = invertedIndex.getSynonymFilesID(synonyms);
 
                 } else {
                     // some of the words do not exist as primary key in the database
                     // so search files for the term no matter what
+                    System.out.println("There is NO DATA back!");
+                    System.out.println(term + " is not registered in the database." + "\n");
+
                     arrOfIDs = invertedIndex.getArrayOfFileIDs(term);
                 }
 
@@ -187,6 +203,62 @@ public class AppGUI extends Pane {
         } else {
             taResult.setText("No match has been found!");
         }
+    }
+
+    private void handleUpdate(String keyWord, String synonym) throws SQLException {
+        String selectSQL = "SELECT * FROM Words WHERE word = ?";
+        String updateSQL = "UPDATE Words SET Synonyms = ? WHERE word = " + "'" + keyWord + "'";
+        String insertSQL = "INSERT INTO Words (Word,Synonyms) VALUES (?,?)";
+
+        PreparedStatement queryStat = conn.prepareStatement(selectSQL);
+        queryStat.setString(1, keyWord);
+        queryStat.executeQuery();
+        ResultSet resultSet = queryStat.getResultSet();
+
+        // for later inserting or updating
+        PreparedStatement statement;
+
+        if (resultSet.next()) {
+            statement = conn.prepareStatement(updateSQL);
+
+//            String keyFromDB = resultSet.getString(1);
+            String synonymsFromDB = resultSet.getString(2);
+
+            System.out.println("Result from Database ====> ");
+            System.out.println(keyWord + " -> " + synonymsFromDB);
+            System.out.println("<----- Updating ------>");
+            System.out.println("The word to be added: " + synonym);
+
+            // do not have to check repetitiveness by doing this
+            Set<String> tempSynonyms = new HashSet<>(Arrays.asList(synonymsFromDB.split("\\W+")));
+            // add user input
+            tempSynonyms.add(synonym);
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (String target :
+                    tempSynonyms) {
+                stringBuilder.append(target).append(",");
+            }
+
+            int lastIndex = stringBuilder.length();
+            stringBuilder.delete(lastIndex - 1, lastIndex);
+
+            statement.setString(1, stringBuilder.toString());
+            statement.executeUpdate();
+
+            System.out.println(keyWord + " -> " + stringBuilder.toString() + "\n");
+
+        } else {
+            System.out.println(keyWord + " is not registered to the Database!");
+            System.out.println("<------ Doing Inserting ----->");
+            statement = conn.prepareStatement(insertSQL);
+            statement.setString(1, keyWord);
+            statement.setString(2, synonym);
+            statement.executeUpdate();
+            System.out.println(keyWord + " -> " + synonym + "\n");
+        }
+
     }
 
     private ArrayList<Integer> getFileIntersection(ArrayList<int[]> list) {
@@ -234,7 +306,7 @@ public class AppGUI extends Pane {
 
     private HBox getTopArea() {
         queryInput = new TextField();
-        btSearch = new Button("Search");
+        Button btSearch = new Button("Search");
 
         HBox pane = new HBox(20);
         pane.getChildren().addAll(queryInput, btSearch);
@@ -254,7 +326,7 @@ public class AppGUI extends Pane {
     }
 
     private HBox getBottomArea() {
-        btBrowser = new Button("Browser");
+        Button btBrowser = new Button("Browser");
         lblStatus = new Label();
 
         // default information
@@ -279,7 +351,8 @@ public class AppGUI extends Pane {
 
         RadioButton enableDB = new RadioButton("Enable");
         RadioButton disableDB = new RadioButton("Disable");
-        pane.getChildren().addAll(new Label("Database: "), enableDB, disableDB);
+        Button btUpdate = new Button("UpdateDB");
+        pane.getChildren().addAll(new Label("Database: "), enableDB, disableDB, btUpdate);
 
         disableDB.setSelected(true);
 
@@ -292,14 +365,80 @@ public class AppGUI extends Pane {
             if (enableDB.isSelected())
                 this.isSynonymEnable = true;
             // debug purpose
-            System.out.println("Synonym Database Enable is:" + isSynonymEnable);
+            System.out.println("Inside the EventHandling, Enable DB is :" + isSynonymEnable + "\n");
         });
 
         disableDB.setOnAction(event -> {
             if (disableDB.isSelected())
                 this.isSynonymEnable = false;
             // debug purpose
-            System.out.println("Synonym Database Enable is:" + isSynonymEnable);
+            System.out.println("Inside the EventHandling, Enable DB is :" + isSynonymEnable + "\n");
+        });
+
+        btUpdate.setOnAction(event -> {
+            GridPane updatePane = new GridPane();
+
+            updatePane.setAlignment(Pos.CENTER);
+            updatePane.setPadding(new Insets(11.5, 12.5, 13.5, 14.5));
+            updatePane.setHgap(5.5);
+            updatePane.setVgap(5.5);
+
+            TextField tfKeyWord = new TextField();
+            TextField tfSynonym = new TextField();
+
+            updatePane.add(new Label("Key Word:"), 0, 0);
+            updatePane.add(tfKeyWord, 1, 0);
+            updatePane.add(new Label("Synonym:"), 0, 1);
+            updatePane.add(tfSynonym, 1, 1);
+
+            Button btAdd = new Button("Add Synonym");
+
+            Label lblStatus = new Label("please enter one synonym per time.");
+            lblStatus.setTextFill(Color.BLUE);
+            lblStatus.setStyle("-fx-font-family: sans-serif");
+
+            updatePane.add(lblStatus, 1, 3);
+            updatePane.add(btAdd, 1, 4);
+            GridPane.setHalignment(btAdd, HPos.RIGHT);
+
+            btAdd.setOnAction(event1 -> {
+                Boolean isSucceed = true;
+                String keyWord = tfKeyWord.getText();
+                String synonym = tfSynonym.getText();
+
+                if (keyWord.equals("") || synonym.equals("")) {
+                    lblStatus.setText("Both fields must be filled out.");
+                    return;
+                }
+
+                if ((keyWord.split("\\W+").length != 1) ||
+                        (synonym.split("\\W+").length != 1)) {
+                    lblStatus.setText("One key word and One synonym per time.");
+                    return;
+                }
+
+                keyWord = WordNormalization.normalize(keyWord);
+                synonym = WordNormalization.normalize(synonym);
+
+                try {
+                    handleUpdate(keyWord, synonym);
+                } catch (SQLException e) {
+                    isSucceed = false;
+                    e.printStackTrace();
+                }
+
+                if (isSucceed)
+                    lblStatus.setText("Update Successful!");
+                else
+                    lblStatus.setText("Failed, Try again!");
+
+            });
+
+            Stage stage = new Stage();
+            Scene scene = new Scene(updatePane, 450, 200);
+            stage.setScene(scene);
+            stage.setTitle("Update Database");
+            stage.show();
         });
 
         return pane;

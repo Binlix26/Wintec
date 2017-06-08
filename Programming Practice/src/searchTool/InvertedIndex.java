@@ -38,8 +38,8 @@ public class InvertedIndex {
     }
 
     //get values by synonym keys
-    public int[] getSynonymFilesID(String sysnonyms) {
-        String[] terms = sysnonyms.split(",");
+    public int[] getSynonymFilesID(String synonyms) {
+        String[] terms = synonyms.split(",");
 
         Set<Integer> set = new HashSet<>();
 

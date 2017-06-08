@@ -136,7 +136,7 @@ public class AppGUI extends Pane {
 
                 pstmt.setString(1, term);
                 ResultSet resultSet = pstmt.executeQuery();
-                // block the thread and wait for result
+
                 if (resultSet.next()) {
                     String key = resultSet.getString(1);
                     String value = resultSet.getString(2);
@@ -144,7 +144,12 @@ public class AppGUI extends Pane {
 
                     arrOfIDs = invertedIndex.getSynonymFilesID(sysnonyms);
 
+                } else {
+                    // some of the words do not exist as primary key in the database
+                    // so search files for the term no matter what
+                    arrOfIDs = invertedIndex.getArrayOfFileIDs(term);
                 }
+
             } else {
                 // don't need the database
                 // put each array of fileIDs for each term in the ArrayList
